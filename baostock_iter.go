@@ -293,21 +293,21 @@ func (c *Client) QueryStockIndustryIter(ctx context.Context, code, date string) 
 
 // QueryHS300StocksIter 查询沪深300成分股（迭代器版本）
 func (c *Client) QueryHS300StocksIter(ctx context.Context, date string) func(yield func(record []string) bool) {
-	return c.queryIndexStocksIter(ctx, MsgTypeQueryHS300StocksRequest, date)
+	return c.queryIndexStocksIter(ctx, MsgTypeQueryHS300StocksRequest, "query_hs300_stocks", date)
 }
 
 // QuerySZ50StocksIter 查询上证50成分股（迭代器版本）
 func (c *Client) QuerySZ50StocksIter(ctx context.Context, date string) func(yield func(record []string) bool) {
-	return c.queryIndexStocksIter(ctx, MsgTypeQuerySZ50StocksRequest, date)
+	return c.queryIndexStocksIter(ctx, MsgTypeQuerySZ50StocksRequest, "query_sz50_stocks", date)
 }
 
 // QueryZZ500StocksIter 查询中证500成分股（迭代器版本）
 func (c *Client) QueryZZ500StocksIter(ctx context.Context, date string) func(yield func(record []string) bool) {
-	return c.queryIndexStocksIter(ctx, MsgTypeQueryZZ500StocksRequest, date)
+	return c.queryIndexStocksIter(ctx, MsgTypeQueryZZ500StocksRequest, "query_zz500_stocks", date)
 }
 
 // queryIndexStocksIter 指数成分股查询辅助方法（迭代器版本）
-func (c *Client) queryIndexStocksIter(ctx context.Context, msgType, date string) func(yield func(record []string) bool) {
+func (c *Client) queryIndexStocksIter(ctx context.Context, msgType, methodName, date string) func(yield func(record []string) bool) {
 	return func(yield func(record []string) bool) {
 		if err := c.ensureLogin(); err != nil {
 			yield(nil)
@@ -318,8 +318,8 @@ func (c *Client) queryIndexStocksIter(ctx context.Context, msgType, date string)
 			date = time.Now().Format("2006-01-02")
 		}
 
-		msgBody := fmt.Sprintf("index_stocks%s%s%s1%s%d%s%s",
-			MessageSplit, c.userID, MessageSplit, MessageSplit,
+		msgBody := fmt.Sprintf("%s%s%s%s1%s%d%s%s",
+			methodName, MessageSplit, c.userID, MessageSplit, MessageSplit,
 			DefaultPerPageCount, MessageSplit, date)
 
 		resp, err := c.sendMessage(ctx, msgType, msgBody)
@@ -351,39 +351,39 @@ func (c *Client) queryIndexStocksIter(ctx context.Context, msgType, date string)
 
 // QueryDepositRateDataIter 查询存款利率数据（迭代器版本）
 func (c *Client) QueryDepositRateDataIter(ctx context.Context, startDate, endDate string) func(yield func(record []string) bool) {
-	return c.queryEconomicDataIter(ctx, MsgTypeQueryDepositRateDataRequest, startDate, endDate, "")
+	return c.queryEconomicDataIter(ctx, MsgTypeQueryDepositRateDataRequest, "query_deposit_rate_data", startDate, endDate, "")
 }
 
 // QueryLoanRateDataIter 查询贷款利率数据（迭代器版本）
 func (c *Client) QueryLoanRateDataIter(ctx context.Context, startDate, endDate string) func(yield func(record []string) bool) {
-	return c.queryEconomicDataIter(ctx, MsgTypeQueryLoanRateDataRequest, startDate, endDate, "")
+	return c.queryEconomicDataIter(ctx, MsgTypeQueryLoanRateDataRequest, "query_loan_rate_data", startDate, endDate, "")
 }
 
 // QueryCPIDataIter 查询CPI数据（迭代器版本）
 func (c *Client) QueryCPIDataIter(ctx context.Context, startDate, endDate string) func(yield func(record []string) bool) {
-	return c.queryEconomicDataIter(ctx, MsgTypeQueryCPIDataRequest, startDate, endDate, "")
+	return c.queryEconomicDataIter(ctx, MsgTypeQueryCPIDataRequest, "query_cpi_data", startDate, endDate, "")
 }
 
 // QueryPPIDataIter 查询PPI数据（迭代器版本）
 func (c *Client) QueryPPIDataIter(ctx context.Context, startDate, endDate string) func(yield func(record []string) bool) {
-	return c.queryEconomicDataIter(ctx, MsgTypeQueryPPIDataRequest, startDate, endDate, "")
+	return c.queryEconomicDataIter(ctx, MsgTypeQueryPPIDataRequest, "query_ppi_data", startDate, endDate, "")
 }
 
 // QueryPMIDataIter 查询PMI数据（迭代器版本）
 func (c *Client) QueryPMIDataIter(ctx context.Context, startDate, endDate string) func(yield func(record []string) bool) {
-	return c.queryEconomicDataIter(ctx, MsgTypeQueryPMIDataRequest, startDate, endDate, "")
+	return c.queryEconomicDataIter(ctx, MsgTypeQueryPMIDataRequest, "query_pmi_data", startDate, endDate, "")
 }
 
 // queryEconomicDataIter 经济数据查询辅助方法（迭代器版本）
-func (c *Client) queryEconomicDataIter(ctx context.Context, msgType, startDate, endDate, extraParam string) func(yield func(record []string) bool) {
+func (c *Client) queryEconomicDataIter(ctx context.Context, msgType, methodName, startDate, endDate, extraParam string) func(yield func(record []string) bool) {
 	return func(yield func(record []string) bool) {
 		if err := c.ensureLogin(); err != nil {
 			yield(nil)
 			return
 		}
 
-		msgBody := fmt.Sprintf("economic_data%s%s%s1%s%d%s%s%s%s",
-			MessageSplit, c.userID, MessageSplit, MessageSplit,
+		msgBody := fmt.Sprintf("%s%s%s%s1%s%d%s%s%s%s",
+			methodName, MessageSplit, c.userID, MessageSplit, MessageSplit,
 			DefaultPerPageCount, MessageSplit, startDate, MessageSplit, endDate)
 
 		if extraParam != "" {

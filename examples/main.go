@@ -13,7 +13,6 @@ import (
 func main() {
 	// 创建新客户端
 	client := baostock.NewClient()
-
 	// 登录服务器
 	fmt.Println("正在连接 BaoStock...")
 	if err := client.Login(context.Background()); err != nil {
@@ -26,21 +25,30 @@ func main() {
 	}()
 	fmt.Println("登录成功！")
 
-	// 示例1: 查询历史K线数据
-	fmt.Println("\n=== 示例1: 历史K线数据 ===")
-	queryKDataExample(client)
+	total := 0
+	_ = client.QueryStockBasic(context.Background(), "", "",
+		func(record []string) error {
+			_, _ = record[0], record[1]
+			total++
+			return nil
+		})
+	fmt.Printf("查询到 %d 条股票基本信息\n", total)
 
-	// 示例2: 查询交易日
-	fmt.Println("\n=== 示例2: 交易日查询 ===")
-	queryTradeDatesExample(client)
+	// // 示例1: 查询历史K线数据
+	// fmt.Println("\n=== 示例1: 历史K线数据 ===")
+	// queryKDataExample(client)
 
-	// 示例3: 查询所有股票
-	fmt.Println("\n=== 示例3: 所有股票查询 ===")
-	queryAllStocksExample(client)
+	// // 示例2: 查询交易日
+	// fmt.Println("\n=== 示例2: 交易日查询 ===")
+	// queryTradeDatesExample(client)
 
-	// 示例4: 查询沪深300成分股
-	fmt.Println("\n=== 示例4: 沪深300成分股 ===")
-	queryIndexStocksExample(client)
+	// // 示例3: 查询所有股票
+	// fmt.Println("\n=== 示例3: 所有股票查询 ===")
+	// queryAllStocksExample(client)
+
+	// // 示例4: 查询沪深300成分股
+	// fmt.Println("\n=== 示例4: 沪深300成分股 ===")
+	// queryIndexStocksExample(client)
 }
 
 // queryKDataExample 演示K线数据查询（流式）

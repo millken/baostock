@@ -3,6 +3,7 @@ package baostock
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -364,7 +365,7 @@ func TestClientQuerySTStocks(t *testing.T) {
 // TestClientWithCustomConfig 测试自定义配置
 func TestClientWithCustomConfig(t *testing.T) {
 	config := &Config{
-		Host:     "www.baostock.com",
+		Host:     "public-api.baostock.com",
 		Port:     10030,
 		Username: "anonymous",
 		Password: "123456",
@@ -437,17 +438,19 @@ func ExampleClient_queryAllStock() {
 	_ = count
 }
 
-func ExampleClient_queryStockBasic() {
+func TestExampleClientQueryStockBasic(t *testing.T) {
 	client := NewClient()
 
 	client.Login(context.Background())
 	defer client.Logout(context.Background())
-
+	total := 0
 	_ = client.QueryStockBasic(context.Background(), "sh.600000", "",
 		func(record []string) error {
 			_, _, _ = record[0], record[1], record[7]
+			total++
 			return nil
 		})
+	fmt.Printf("查询到 %d 条股票基本信息\n", total)
 }
 
 func ExampleClient_queryHS300Stocks() {
@@ -478,7 +481,7 @@ func ExampleClient_queryDepositRate() {
 
 func ExampleClient_withCustomConfig() {
 	config := &Config{
-		Host:     "www.baostock.com",
+		Host:     "public-api.baostock.com",
 		Port:     10030,
 		Username: "anonymous",
 		Password: "123456",
@@ -743,7 +746,7 @@ func ExampleNewClient() {
 // ExampleNewClientWithConfig 使用自定义配置创建客户端示例
 func ExampleNewClientWithConfig() {
 	config := &Config{
-		Host:     "www.baostock.com",
+		Host:     "public-api.baostock.com",
 		Port:     10030,
 		Username: "anonymous",
 		Password: "123456",

@@ -9,8 +9,8 @@ import (
 	"github.com/millken/baostock"
 )
 
-// ExampleIterator_basic 演示基本的迭代器用法
-func ExampleIterator_basic() {
+// ExampleClient_QueryAllStockIter 演示基本的迭代器用法
+func ExampleClient_QueryAllStockIter() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)
@@ -26,8 +26,8 @@ func ExampleIterator_basic() {
 	}
 }
 
-// ExampleIterator_historyKData 演示查询历史K线数据的迭代器用法
-func ExampleIterator_historyKData() {
+// ExampleClient_QueryHistoryKDataPlusIter 演示查询历史K线数据的迭代器用法
+func ExampleClient_QueryHistoryKDataPlusIter() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)
@@ -50,8 +50,8 @@ func ExampleIterator_historyKData() {
 	}
 }
 
-// ExampleIterator_earlyBreak 演示提前终止迭代
-func ExampleIterator_earlyBreak() {
+// ExampleClient_QueryAllStockIter_earlyBreak 演示提前终止迭代
+func ExampleClient_QueryAllStockIter_earlyBreak() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)
@@ -72,8 +72,8 @@ func ExampleIterator_earlyBreak() {
 	}
 }
 
-// ExampleIterator_withFilter 演示在迭代中过滤数据
-func ExampleIterator_withFilter() {
+// ExampleClient_QueryAllStockIter_withFilter 演示在迭代中过滤数据
+func ExampleClient_QueryAllStockIter_withFilter() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)
@@ -93,8 +93,8 @@ func ExampleIterator_withFilter() {
 	}
 }
 
-// ExampleIterator_collectToSlice 演示收集数据到切片
-func ExampleIterator_collectToSlice() {
+// ExampleClient_QueryAllStockIter_collectToSlice 演示收集数据到切片
+func ExampleClient_QueryAllStockIter_collectToSlice() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)
@@ -115,8 +115,8 @@ func ExampleIterator_collectToSlice() {
 	fmt.Printf("收集了 %d 只股票\n", len(codes))
 }
 
-// ExampleIterator_indexStocks 演示查询指数成分股
-func ExampleIterator_indexStocks() {
+// ExampleClient_QueryHS300StocksIter 演示查询指数成分股
+func ExampleClient_QueryHS300StocksIter() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)
@@ -132,8 +132,8 @@ func ExampleIterator_indexStocks() {
 	}
 }
 
-// ExampleIterator_economicData 演示查询经济数据
-func ExampleIterator_economicData() {
+// ExampleClient_QueryDepositRateDataIter 演示查询经济数据
+func ExampleClient_QueryDepositRateDataIter() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)
@@ -149,8 +149,8 @@ func ExampleIterator_economicData() {
 	}
 }
 
-// ExampleIterator_stockIndustry 演示查询行业分类
-func ExampleIterator_stockIndustry() {
+// ExampleClient_QueryStockIndustryIter 演示查询行业分类
+func ExampleClient_QueryStockIndustryIter() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)
@@ -166,8 +166,8 @@ func ExampleIterator_stockIndustry() {
 	}
 }
 
-// ExampleIterator_specialStocks 演示查询特殊股票
-func ExampleIterator_specialStocks() {
+// ExampleClient_QuerySTStocksIter 演示查询特殊股票
+func ExampleClient_QuerySTStocksIter() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)
@@ -183,8 +183,8 @@ func ExampleIterator_specialStocks() {
 	}
 }
 
-// ExampleIterator_comparison 对比回调和迭代器的使用方式
-func ExampleIterator_comparison() {
+// ExampleClient_comparison 对比回调和迭代器的使用方式
+func ExampleClient_comparison() {
 	client := baostock.NewClient()
 	if err := client.Login(context.Background()); err != nil {
 		log.Fatal(err)

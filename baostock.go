@@ -78,9 +78,9 @@ import (
 // 协议常量
 const (
 	// 服务器配置
-	DefaultServerHost = "www.baostock.com"
+	DefaultServerHost = "public-api.baostock.com"
 	DefaultServerPort = 10030
-	ClientVersion     = "00.8.90"
+	ClientVersion     = "00.9.10"
 
 	// 消息分隔符
 	MessageSplit = "\x01" // ASCII 0x01
@@ -267,6 +267,7 @@ type Config struct {
 	Username string        // 用户名
 	Password string        // 密码
 	Timeout  time.Duration // 超时时间
+	APIKey   string        // API Key（可选，用于高级功能）
 }
 
 // DefaultConfig 返回默认配置
@@ -288,6 +289,7 @@ type Client struct {
 	connected bool
 	loggedIn  bool
 	userID    string
+	apiKey    string
 }
 
 // NewClient 使用默认配置创建新的 BaoStock 客户端
@@ -340,13 +342,23 @@ func (c *Client) Disconnect() error {
 	return err
 }
 
+// SetAPIKey 设置 API Key，用于高级功能
+func (c *Client) SetAPIKey(key string) {
+	c.apiKey = key
+}
+
 // Login 与 BaoStock 服务器进行身份验证
 func (c *Client) Login(ctx context.Context) error {
 	if err := c.Connect(ctx); err != nil {
 		return err
 	}
 
-	msgBody := fmt.Sprintf("login%s%s%s%s%s0", MessageSplit, c.config.Username, MessageSplit, c.config.Password, MessageSplit)
+	options := "0"
+	if c.apiKey != "" {
+		options = c.apiKey
+	}
+
+	msgBody := fmt.Sprintf("login%s%s%s%s%s%s", MessageSplit, c.config.Username, MessageSplit, c.config.Password, MessageSplit, options)
 
 	resp, err := c.sendMessage(ctx, MsgTypeLoginRequest, msgBody)
 	if err != nil {
@@ -931,7 +943,7 @@ func (c *Client) QueryStockIndustry(ctx context.Context, code, date string, call
 // callback 参数：单条记录数据
 // 返回 error 可停止迭代
 func (c *Client) QueryHS300Stocks(ctx context.Context, date string, callback func(record []string) error) error {
-	return c.queryIndexStocks(ctx, MsgTypeQueryHS300StocksRequest, date, callback)
+	return c.queryIndexStocks(ctx, MsgTypeQueryHS300StocksRequest, "query_hs300_stocks", date, callback)
 }
 
 // QuerySZ50Stocks 查询上证50成分股（流式）
@@ -939,7 +951,7 @@ func (c *Client) QueryHS300Stocks(ctx context.Context, date string, callback fun
 // callback 参数：单条记录数据
 // 返回 error 可停止迭代
 func (c *Client) QuerySZ50Stocks(ctx context.Context, date string, callback func(record []string) error) error {
-	return c.queryIndexStocks(ctx, MsgTypeQuerySZ50StocksRequest, date, callback)
+	return c.queryIndexStocks(ctx, MsgTypeQuerySZ50StocksRequest, "query_sz50_stocks", date, callback)
 }
 
 // QueryZZ500Stocks 查询中证500成分股（流式）
@@ -947,11 +959,11 @@ func (c *Client) QuerySZ50Stocks(ctx context.Context, date string, callback func
 // callback 参数：单条记录数据
 // 返回 error 可停止迭代
 func (c *Client) QueryZZ500Stocks(ctx context.Context, date string, callback func(record []string) error) error {
-	return c.queryIndexStocks(ctx, MsgTypeQueryZZ500StocksRequest, date, callback)
+	return c.queryIndexStocks(ctx, MsgTypeQueryZZ500StocksRequest, "query_zz500_stocks", date, callback)
 }
 
 // queryIndexStocks 指数成分股查询辅助方法
-func (c *Client) queryIndexStocks(ctx context.Context, msgType, date string, callback func(record []string) error) error {
+func (c *Client) queryIndexStocks(ctx context.Context, msgType, methodName, date string, callback func(record []string) error) error {
 	if err := c.ensureLogin(); err != nil {
 		return err
 	}
@@ -960,8 +972,8 @@ func (c *Client) queryIndexStocks(ctx context.Context, msgType, date string, cal
 		date = time.Now().Format("2006-01-02")
 	}
 
-	msgBody := fmt.Sprintf("index_stocks%s%s%s1%s%d%s%s",
-		MessageSplit, c.userID, MessageSplit, MessageSplit,
+	msgBody := fmt.Sprintf("%s%s%s%s1%s%d%s%s",
+		methodName, MessageSplit, c.userID, MessageSplit, MessageSplit,
 		DefaultPerPageCount, MessageSplit, date)
 
 	resp, err := c.sendMessage(ctx, msgType, msgBody)
@@ -996,7 +1008,7 @@ func (c *Client) queryIndexStocks(ctx context.Context, msgType, date string, cal
 // callback 参数：单条记录数据
 // 返回 error 可停止迭代
 func (c *Client) QueryDepositRateData(ctx context.Context, startDate, endDate string, callback func(record []string) error) error {
-	return c.queryEconomicData(ctx, MsgTypeQueryDepositRateDataRequest, startDate, endDate, "", callback)
+	return c.queryEconomicData(ctx, MsgTypeQueryDepositRateDataRequest, "query_deposit_rate_data", startDate, endDate, "", callback)
 }
 
 // QueryLoanRateData 查询贷款利率数据（流式）
@@ -1004,7 +1016,7 @@ func (c *Client) QueryDepositRateData(ctx context.Context, startDate, endDate st
 // callback 参数：单条记录数据
 // 返回 error 可停止迭代
 func (c *Client) QueryLoanRateData(ctx context.Context, startDate, endDate string, callback func(record []string) error) error {
-	return c.queryEconomicData(ctx, MsgTypeQueryLoanRateDataRequest, startDate, endDate, "", callback)
+	return c.queryEconomicData(ctx, MsgTypeQueryLoanRateDataRequest, "query_loan_rate_data", startDate, endDate, "", callback)
 }
 
 // QueryCPIData 查询CPI数据（流式）
@@ -1012,7 +1024,7 @@ func (c *Client) QueryLoanRateData(ctx context.Context, startDate, endDate strin
 // callback 参数：单条记录数据
 // 返回 error 可停止迭代
 func (c *Client) QueryCPIData(ctx context.Context, startDate, endDate string, callback func(record []string) error) error {
-	return c.queryEconomicData(ctx, MsgTypeQueryCPIDataRequest, startDate, endDate, "", callback)
+	return c.queryEconomicData(ctx, MsgTypeQueryCPIDataRequest, "query_cpi_data", startDate, endDate, "", callback)
 }
 
 // QueryPPIData 查询PPI数据（流式）
@@ -1020,7 +1032,7 @@ func (c *Client) QueryCPIData(ctx context.Context, startDate, endDate string, ca
 // callback 参数：单条记录数据
 // 返回 error 可停止迭代
 func (c *Client) QueryPPIData(ctx context.Context, startDate, endDate string, callback func(record []string) error) error {
-	return c.queryEconomicData(ctx, MsgTypeQueryPPIDataRequest, startDate, endDate, "", callback)
+	return c.queryEconomicData(ctx, MsgTypeQueryPPIDataRequest, "query_ppi_data", startDate, endDate, "", callback)
 }
 
 // QueryPMIData 查询PMI数据（流式）
@@ -1028,17 +1040,17 @@ func (c *Client) QueryPPIData(ctx context.Context, startDate, endDate string, ca
 // callback 参数：单条记录数据
 // 返回 error 可停止迭代
 func (c *Client) QueryPMIData(ctx context.Context, startDate, endDate string, callback func(record []string) error) error {
-	return c.queryEconomicData(ctx, MsgTypeQueryPMIDataRequest, startDate, endDate, "", callback)
+	return c.queryEconomicData(ctx, MsgTypeQueryPMIDataRequest, "query_pmi_data", startDate, endDate, "", callback)
 }
 
 // queryEconomicData 经济数据查询辅助方法
-func (c *Client) queryEconomicData(ctx context.Context, msgType, startDate, endDate, extraParam string, callback func(record []string) error) error {
+func (c *Client) queryEconomicData(ctx context.Context, msgType, methodName, startDate, endDate, extraParam string, callback func(record []string) error) error {
 	if err := c.ensureLogin(); err != nil {
 		return err
 	}
 
-	msgBody := fmt.Sprintf("economic_data%s%s%s1%s%d%s%s%s%s",
-		MessageSplit, c.userID, MessageSplit, MessageSplit,
+	msgBody := fmt.Sprintf("%s%s%s%s1%s%d%s%s%s%s",
+		methodName, MessageSplit, c.userID, MessageSplit, MessageSplit,
 		DefaultPerPageCount, MessageSplit, startDate, MessageSplit, endDate)
 
 	if extraParam != "" {

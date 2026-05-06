@@ -5,10 +5,10 @@
 BaoStock 是一个免费、开源的证券数据平台，提供完整的A股历史数据、实时行情、财务数据等。本文档详细描述了其客户端与服务器之间的通信协议。
 
 **服务器信息:**
-- 主机: `www.baostock.com`
+- 主机: `public-api.baostock.com`
 - 端口: `10030`
 - 传输协议: TCP
-- 客户端版本: `00.8.90`
+- 客户端版本: `00.9.10`
 
 ---
 
@@ -33,13 +33,13 @@ BaoStock 是一个免费、开源的证券数据平台，提供完整的A股历�
 
 | 字段 | 长度 | 说明 | 示例 |
 |------|------|------|------|
-| 版本号 | 6字节 | 客户端版本号 | `00.8.90` |
+| 版本号 | 7字节 | 客户端版本号 | `00.9.10` |
 | 分隔符 | 1字节 | `\x1` | - |
 | 消息类型 | 2字节 | 请求/响应类型代码 | `00`, `01` 等 |
 | 分隔符 | 1字节 | `\x1` | - |
 | 消息体长度 | 10字节 | 消息体长度，左补0 | `0000000123` |
 
-**消息头示例:** `00.8.90\x100\x10000000045`
+**消息头示例:** `00.9.10\x100\x10000000045`
 
 ---
 
@@ -618,7 +618,7 @@ crc32str = zlib.crc32(bytes(消息头 + 消息体, encoding='utf-8'))
 ### 8.1 基本流程
 
 ```
-1. 创建TCP连接 (www.baostock.com:10030)
+1. 创建TCP连接 (public-api.baostock.com:10030)
 2. 发送登录请求
 3. 接收登录响应
 4. 发送业务请求
@@ -632,19 +632,19 @@ crc32str = zlib.crc32(bytes(消息头 + 消息体, encoding='utf-8'))
 
 **请求:**
 ```
-00.8.90\x100\x1000000033\x1login\x1anonymous\x1123456\x10\x1-1234567890\n
+00.9.10\x100\x1000000033\x1login\x1anonymous\x1123456\x10\x1-1234567890\n
 ```
 
 **响应 (成功):**
 ```
-00.8.90\x101\x1000000048\x10\x1login success!\x1login\x1anonymous\n
+00.9.10\x101\x1000000048\x10\x1login success!\x1login\x1anonymous\n
 ```
 
 ### 8.3 K线数据请求示例
 
 **请求:**
 ```
-00.8.90\x195\x1000000160\x1query_history_k_data_plus\x1anonymous\x11\x110000\x1sh.600000\x1date,code,open,high,low,close,volume\x12023-01-01\x12023-12-31\x1d\x13\x11234567890\n
+00.9.10\x195\x1000000160\x1query_history_k_data_plus\x1anonymous\x11\x110000\x1sh.600000\x1date,code,open,high,low,close,volume\x12023-01-01\x12023-12-31\x1d\x13\x11234567890\n
 ```
 
 ---
@@ -653,9 +653,9 @@ crc32str = zlib.crc32(bytes(消息头 + 消息体, encoding='utf-8'))
 
 ```python
 # 服务器配置
-BAOSTOCK_SERVER_IP = "www.baostock.com"
+BAOSTOCK_SERVER_IP = "public-api.baostock.com"
 BAOSTOCK_SERVER_PORT = 10030
-BAOSTOCK_CLIENT_VERSION = "00.8.90"
+BAOSTOCK_CLIENT_VERSION = "00.9.10"
 
 # 消息分隔符
 MESSAGE_SPLIT = "\x1"           # 字段分隔符
@@ -706,7 +706,7 @@ import socket
 import zlib
 
 def send_message(sock, msg_type, msg_body):
-    version = "00.8.90"
+    version = "00.9.10"
     header = f"{version}\x1{msg_type}\x1{str(len(msg_body)).zfill(10)}"
     full_msg = header + msg_body
     crc32 = zlib.crc32(bytes(full_msg, 'utf-8'))
@@ -723,7 +723,7 @@ def send_message(sock, msg_type, msg_body):
 
 # 连接服务器
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("www.baostock.com", 10030))
+sock.connect(("public-api.baostock.com", 10030))
 
 # 登录
 login_body = "login\x1anonymous\x1123456\x10"
@@ -746,7 +746,7 @@ class BaoStockClient:
 
     def connect(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect(("www.baostock.com", 10030))
+        self.sock.connect(("public-api.baostock.com", 10030))
 
     def send_request(self, msg_type, msg_body):
         header = f"{self.version}\x1{msg_type}\x1{str(len(msg_body)).zfill(10)}"
